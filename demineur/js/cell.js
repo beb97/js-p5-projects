@@ -9,31 +9,46 @@ class Cell {
 
   draw() {
     var revealedColor = 'white';
+    var revealedMine = '#ffc2b3';
+    var flaged = '#e6ffe6';
     var notRevealedColor = 200; // Gris pale
-    var borderColor = 100; // Gris fonce
-
+    var borderColorDefault = 100; // Gris fonce
+    var borderColorHover = "#e6ffe6"; // Gris fonce
     var neighborsMineNumber = this.countNeighborsMines();
 
-    stroke(borderColor); // Bordure
-    if(this.revealed) {
-      fill(revealedColor);
-      this.drawBackGround();
+    // Fond
+    var backgroundColor;
+    if (this.revealed) {
+      if (this.isMine) {
+        backgroundColor = revealedMine;
+      } else {
+        backgroundColor = revealedColor;
+      }
     } else {
-      fill(notRevealedColor);
-      this.drawBackGround();
+      if (this.flaged) {
+        backgroundColor = flaged;
+      } else {
+        backgroundColor = notRevealedColor;
+      }
     }
+    fill(backgroundColor);
+    var borderColor = (this == game.board.getCurrentCell()) ? borderColorHover : borderColorDefault;
+    stroke(borderColor); // Bordure
+    this.drawBackGround();
 
-    if(this.flaged) {
-      //if(this.isFlaged && !board.isGameStoped()) {
-        this.drawFlag();
-    }
-
-    if(this.revealed || board.isGameStoped()) {
+    // MINE
+    if(this.revealed || game.board.isGameStoped()) {
       if(this.isMine) {
         this.drawMine();
       }
     }
 
+    // FLAG
+    if(this.flaged) {
+        this.drawFlag();
+    }
+
+    // NUMBER
     if(this.revealed && !this.isMine) {
         if (neighborsMineNumber > 0) {
           this.drawCounter(neighborsMineNumber);
@@ -45,48 +60,53 @@ class Cell {
   drawBackGround() {
     var corner = this.getTopLeftCorner();
     var borderSize = 1;
-    rect(corner.x, corner.y, cellSize-borderSize, cellSize-borderSize);
+    rect(corner.x, corner.y, game.settings.cellSize-borderSize, game.settings.cellSize-borderSize);
   }
 
   drawMine() {
     var center = this.getCenter();
     fill('red');
-    ellipse(center.x, center.y, cellSize/2);
+    ellipse(center.x, center.y, game.settings.cellSize/2);
   }
 
   drawFlag() {
     var center = this.getCenter();
     fill('green');
-    var d = cellSize/4;
+    var d = game.settings.cellSize/4;
     triangle(center.x, center.y - d,center.x - d , center.y +d, center.x + d, center.y + d);
   }
 
   drawCounter(neighborsMineNumber) {
     var center = this.getCenter();
     fill('black');
-    textSize(cellSize/2);
+    textSize(game.settings.cellSize/2);
     textAlign(CENTER, CENTER);
     text(neighborsMineNumber, center.x, center.y);
   }
 
   getTopLeftCorner() {
-    return new Point(this.x() * cellSize, this.y() * cellSize);
+
+    // Centrage du board
+    var boardWidth = game.settings.boardSize * game.settings.cellSize;
+    var diff  = cnv.width - boardWidth;
+    var d = diff/2;
+    return createVector(this.x() * game.settings.cellSize + d , this.y() * game.settings.cellSize  + d);
   }
 
   getCenter() {
     var corner = this.getTopLeftCorner();
-    return new Point(corner.x + cellSize/2, corner.y + cellSize/2);
+    return createVector(corner.x + game.settings.cellSize/2, corner.y + game.settings.cellSize/2);
   }
 
   getNeighbors(mode) {
-    var N  = new Point(0 ,-1);
-    var NE = new Point(1 ,-1);
-    var E  = new Point(1 , 0);
-    var SE = new Point(1 , 1);
-    var S  = new Point(0 , 1);
-    var SW = new Point(-1, 1);
-    var W  = new Point(-1, 0);
-    var NW = new Point(-1,-1);
+    var N  = createVector(0 ,-1);
+    var NE = createVector(1 ,-1);
+    var E  = createVector(1 , 0);
+    var SE = createVector(1 , 1);
+    var S  = createVector(0 , 1);
+    var SW = createVector(-1, 1);
+    var W  = createVector(-1, 0);
+    var NW = createVector(-1,-1);
     var positions;
     switch (mode) {
       case 'DIRECT':
@@ -96,7 +116,7 @@ class Cell {
       positions = [NW,N,NE,W,E,SW,S,SE];
       break;
     }
-    var neighbors = positions.map(position => board.get( this.x()+position.x, this.y()+position.y ))
+    var neighbors = positions.map(position => game.board.get( this.x()+position.x, this.y()+position.y ))
     .filter(neighbor => neighbor!= undefined);
     return neighbors;
   }
@@ -133,11 +153,11 @@ class Cell {
   }
 
   x() {
-    return this.index % boardSize;
+    return this.index % game.settings.boardSize;
   }
 
   y() {
-    return Math.trunc( this.index / boardSize );
+    return Math.trunc( this.index / game.settings.boardSize );
   }
 
 }

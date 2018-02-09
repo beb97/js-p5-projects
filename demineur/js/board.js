@@ -3,7 +3,7 @@ class Board {
   constructor(size) {
     this.width = size;
     this.height = size;
-    this.mineGenerated = false;
+    this.minesCount = 0;
     this.clickedCell = undefined;
     this.gameIsOver = false;
     this.gameIsWon = false;
@@ -12,10 +12,22 @@ class Board {
   }
 
   drawBoard() {
-    for( const [index, cell] of this.cells.entries() ){
+    var backgroundColor;
+    var won = '#99e699';
+    var lost = '#ffc2b3';
+    if (this.gameIsWon) {
+      backgroundColor = won;
+    } else if (this.gameIsOver) {
+      backgroundColor = lost;
+    } else {
+      var color = map(game.settings.difficulty, game.settings.difficultyMin, game.settings.difficultyMax, 150, 50);
+      backgroundColor = color;
+    }
+    background(backgroundColor);
+    for( let [index, cell] of this.cells.entries() ){
       cell.draw(index);
     }
-    prompt.html(board.text);
+    prompt.html(this.text);
   }
 
   get(x,y) {
@@ -35,55 +47,61 @@ class Board {
   }
 
   getClickedCell() {
-    var x = Math.floor(mouseX/cellSize);
-    var y = Math.floor(mouseY/cellSize);
-    this.clickedCell = this.get(x, y);
+    this.clickedCell = this.getCurrentCell();
     return this.clickedCell;
   }
 
-  getFirstCell() {
-    return this.cells[0];
-  }
+  getCurrentCell() {
+    // Centrage du board
+    var boardWidth = game.settings.boardSize * game.settings.cellSize;
+    var diff  = cnv.width - boardWidth;
+    var d = diff/2;
 
-  getNextCell(index) {
-    if (index+1 >= this.cells.length) {
-      return this.cells[0];
-    } else {
-      return this.cells[index+1];
-    }
+    var x = Math.floor((mouseX - d)/game.settings.cellSize);
+    var y = Math.floor((mouseY - d)/game.settings.cellSize);
+    return  this.get(x, y);
   }
 
   generateMines() {
-    if (!this.mineGenerated) {
+    if (this.minesCount == 0) {
 
-      var minProbability = 0.01;
-      var mineCount = 0;
-      var currentCell = this.getFirstCell();
+      // Probabilité en fonction de la densité de mines.
+      var mineCounter = 0;
+      var mineWanted = game.settings.getMinesNumber();
+      var minProbability = mineWanted/this.cells.length;
 
+      var candidates = this.cells.filter(cell => cell != this.clickedCell);
+      var canditateIndex = 0;
 
       // Tant qu'on a pas assez de mines
-      while (mineCount<minesNumber) {
-        // Cell n'est pas celle cliqué, ni deja minée
-        if (currentCell !== this.clickedCell && !currentCell.isMine) {
+      while (mineCounter<mineWanted) {
+
+          // Mine sur cette cellule ?
           if (random()<minProbability) {
-            currentCell.isMine = true;
-            mineCount++;
+            this.cells[candidates[canditateIndex].index].isMine = true;
+            mineCounter++;
+            candidates.splice(canditateIndex,1); // L'élément n'est plus un candidat
           }
-        }
-        currentCell = this.getNextCell(currentCell.index);
+
+          // Prochaine cellule
+          if (canditateIndex >= candidates.length-1) {
+            canditateIndex = 0; // On reboucle
+          } else {
+            canditateIndex++; // On cherche le prochain candidat;
+          }
       }
 
-      this.mineGenerated = true;
+      this.minesCount = mineCounter;
     }
   }
 
   handleClick() {
     console.log(mouseX, mouseY);
-    board.getClickedCell();
-    if(board.clickedCell && !this.isGameStoped()) {
-      board.generateMines();
-      board.clickedCell.clicked();
-      board.checkStatus();
+    this.getClickedCell();
+    if(this.clickedCell && !this.isGameStoped()) {
+      this.generateMines();
+      this.clickedCell.clicked();
+      this.checkStatus();
     }
 
   }
@@ -91,13 +109,10 @@ class Board {
   checkStatus() {
     if (this.isLost()) {
       this.gameIsOver = true;
-      this.text='Boom. You ded x_x';
+      this.text='oh no :( you died x_x';
     } else if (this.isWon()) {
-      board.gameIsWon = true;
-      this.text="Yeas ! You got'em all :D";
-    } else {
-      this.text=minesNumber+' mines';
-
+      this.gameIsWon = true;
+      this.text="Good job ! You got'em all :D";
     }
   }
 
@@ -111,9 +126,8 @@ class Board {
 
   isWon() {
     var isWon = false;
-    var cellsNumber = boardSize*boardSize;
-    var revealed = board.cells.filter(cell => cell.revealed).length;
-    if(minesNumber == cellsNumber-revealed) {
+    var revealed = this.cells.filter(cell => cell.revealed).length;
+    if(this.minesCount == this.cells.length-revealed) {
       isWon = true;
     }
     return isWon;

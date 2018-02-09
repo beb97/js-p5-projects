@@ -1,15 +1,7 @@
-var cWidth;
-var cHeight;
-var boardSize = 10;
-var cellSize = 30;
-var minesNumber = 1;
-
-var boardSizeMin = 2;
-var boardSizeMax = 10;
-
-var cnv;
+// Game
 var game;
-var board;
+// IHM
+var cnv;
 var button;
 var prompt;
 var sizeSlider;
@@ -19,84 +11,92 @@ var difficultyCount;
 
 
 function setup() {
-  cWidth = cellSize * boardSize;
-  cHeight = cellSize * boardSize;
-
-  // CANEVAS
-  cnv = createCanvas(cWidth,cHeight);
-  cnv.parent('container');
-
-  // PROMPT
-  prompt = createDiv('').size(200, 20);
-  prompt.parent('prompt');
-  // SIZE
-  sizeSlider = createSlider(boardSizeMin, boardSizeMax, 6);
-  sizeSlider.parent('sizeSlider');
-  sizeCount = select('#sizeCount');
-  // DIFFICULTY
-  difficultySlider = createSlider(1, 100, 20);
-  difficultySlider.parent('difficultySlider');
-  difficultyCount = select('#difficultyCount');
 
   //GAME
   game = new Game();
-  board = game.board;
+
+  var cWidth = game.settings.cellSize * game.settings.boardSizeMax;
+  var cHeight = game.settings.cellSize * game.settings.boardSizeMax;
+
+  // CANEVAS
+  cnv = createCanvas(cWidth,cHeight);
+  cnv.parent('canevas');
+
+  // PROMPT
+  prompt = select('#prompt');
+  // SIZE
+  sizeSlider = createSlider(game.settings.boardSizeMin, game.settings.boardSizeMax, game.settings.boardSizeDefault);
+  sizeSlider.parent('sizeSlider');
+  sizeCount = select('#sizeCount');
+  // DIFFICULTY
+  difficultySlider = createSlider(game.settings.difficultyMin, game.settings.difficultyMax, game.settings.difficultyDefault);
+  difficultySlider.parent('difficultySlider');
+  difficultyCount = select('#difficultyCount');
 
   // RESET
-  button = createButton('Reset');
-  button.parent('reset');
-  button.position();
+  button = select('#reset');
   button.mousePressed(game.reset);
 
 }
 
 function draw() {
   game.update();
-  background(125);
-  board.drawBoard();
+  game.board.drawBoard();
 }
 
 function mousePressed() {
-  board.handleClick();
-  // return false;
+  if ( game.withinCanevas(mouseX, mouseY) ) {
+    game.board.handleClick();
+  }
+}
+
+class Settings {
+  constructor(boardSize = 5, difficulty = 25) {
+    this.boardSizeMin = 2;
+    this.boardSizeMax = 10;
+    this.boardSizeDefault = 5;
+    this.boardSize = boardSize;
+    this.difficultyMin = 1;
+    this.difficultyMax = 99;
+    this.difficultyDefault = 25;
+    this.difficulty = difficulty;
+    this.cellSize = 30;
+  }
+
+  getMinesNumber() {
+    var maxMines = this.boardSize*this.boardSize-1;
+    return int(map(this.difficulty,this.difficultyMin,this.difficultyMax,1,maxMines));
+  }
 }
 
 class Game {
   constructor() {
-    if(minesNumber > boardSize*boardSize -1) {
-      minesNumber = boardSize*boardSize -1;
-    }
-    boardSize = sizeSlider.value();
-    this.board = new Board(boardSize);
+    this.settings = new Settings();
+    this.board = new Board(this.settings.boardSize);
   }
 
   reset() {
-    this.board = new Board(boardSize);
-    board = this.board;
+    delete game.settings;
+    delete game.board;
+    game.settings = new Settings(sizeSlider.value(), difficultySlider.value());
+    game.board = new Board(game.settings.boardSize);
   }
 
   update() {
 
-    if (sizeSlider.value() != boardSize) {
-      boardSize = sizeSlider.value();
-      game.reset();
+    if (sizeSlider.value() != this.settings.boardSize) {
+      this.reset();
     }
 
-    if (difficultySlider.value() != minesNumber) {
-      var maxMines = boardSize*boardSize-1;
-      minesNumber = int(map(difficultySlider.value(),1,100,1,maxMines));
-      // game.reset();
+    if (difficultySlider.value() != this.settings.difficulty) {
+      this.reset();
     }
 
-    difficultyCount.html(minesNumber);
-    sizeCount.html(boardSize);
-
+    difficultyCount.html(this.settings.getMinesNumber());
+    sizeCount.html(this.settings.boardSize);
   }
-}
 
-class Point {
-  constructor(x,y) {
-    this.x = x;
-    this.y = y;
+  withinCanevas(x,y) {
+    return (0 < x && x <= cnv.width) && ( 0 < y && y <= cnv.height);
   }
 }
