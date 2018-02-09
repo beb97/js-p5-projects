@@ -2,6 +2,7 @@
 var game;
 // IHM
 var cnv;
+var home;
 var button;
 var prompt;
 var sizeSlider;
@@ -24,6 +25,8 @@ function setup() {
 
   // PROMPT
   prompt = select('#prompt');
+
+  home = select('#home');
   // SIZE
   sizeSlider = createSlider(game.settings.boardSizeMin, game.settings.boardSizeMax, game.settings.boardSizeDefault);
   sizeSlider.parent('sizeSlider');

@@ -15,19 +15,25 @@ class Board {
     var backgroundColor;
     var won = '#99e699';
     var lost = '#ffc2b3';
+    var variableColor = floor(map(game.settings.difficulty, game.settings.difficultyMin, game.settings.difficultyMax, 150, 50));
     if (this.gameIsWon) {
       backgroundColor = won;
     } else if (this.gameIsOver) {
       backgroundColor = lost;
     } else {
-      var color = map(game.settings.difficulty, game.settings.difficultyMin, game.settings.difficultyMax, 150, 50);
-      backgroundColor = color;
+      backgroundColor = variableColor;
     }
+    home.style(this.greyScaleToRgbColorCss(variableColor));
     background(backgroundColor);
+
     for( let [index, cell] of this.cells.entries() ){
       cell.draw(index);
     }
     prompt.html(this.text);
+  }
+
+  greyScaleToRgbColorCss(grey) {
+    return "color:rgb("+grey+","+grey+","+grey+")";
   }
 
   get(x,y) {
