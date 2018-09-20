@@ -5,8 +5,6 @@ var cnv;
 var home;
 var button;
 var prompt;
-var sizeSlider;
-var sizeCount;
 
 
 function setup() {
