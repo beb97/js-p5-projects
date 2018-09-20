@@ -1,9 +1,9 @@
 class Player {
 
-  constructor(size) {
-    this.pieces = [];
-  }
+    constructor(size) {
+        this.pieces = [];
+    }
 
-  
+
 
 }

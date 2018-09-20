@@ -1,96 +1,93 @@
 class Board {
 
-  constructor(size) {
-    this.width = size;
-    this.height = size;
-    this.clickedCell = undefined;
-    this.gameIsOver = false;
-    this.gameIsWon = false;
-    this.text = '';
-    this.cells = new Array(this.width * this.height).fill().map( (item, index) => new Cell(index) );
-    this.cells[0].piece = new Laser(this.cells[0]);
-    this.cells[4].piece = new Miroir(this.cells[4]);
-    this.rayPather = new RayPather();
-  }
-
-  draw() {
-    var backgroundColor = '#888888';
-    background(backgroundColor);
-
-    for( let [index, cell] of this.cells.entries() ){
-      cell.draw(index);
+    constructor(size) {
+        this.width = size;
+        this.height = size;
+        this.clickedCell = undefined;
+        this.gameIsOver = false;
+        this.gameIsWon = false;
+        this.text = '';
+        this.cells = new Array(this.width * this.height).fill().map( (item, index) => new Cell(index) );
+        this.layout = new Layout(this).classic().import();
+        this.rayPather = new RayPather();
     }
 
-    this.rayPather.draw();
+    draw() {
+        const backgroundColor = '#888888';
+        background(backgroundColor);
 
-    prompt.html(this.text);
-  }
+        for( let [index, cell] of this.cells.entries() ){
+            cell.draw(index);
+        }
 
-  get(x,y) {
-    if (this.xIsValide(x) && this.yIsValide(y)) {
-      return this.cells[x + y*this.width];
-    } else {
-      return undefined;
+        this.rayPather.draw();
+
+        prompt.html(this.text);
     }
-  }
 
-  xIsValide(x) {
-    return x>=0 && x<this.width;
-  }
-
-  yIsValide(y) {
-    return y>=0 && y<this.height;
-  }
-
-  getClickedCell() {
-    this.clickedCell = this.getCurrentCell();
-    return this.clickedCell;
-  }
-
-  getCurrentCell() {
-    // Centrage du board
-    var boardWidth = game.settings.boardSize * game.settings.cellSize;
-    var diff  = cnv.width - boardWidth;
-    var d = diff/2;
-
-    var x = Math.floor((mouseX - d)/game.settings.cellSize);
-    var y = Math.floor((mouseY - d)/game.settings.cellSize);
-    return  this.get(x, y);
-  }
-
-  handleClick() {
-    console.log(mouseX, mouseY);
-    this.getClickedCell();
-    if(this.clickedCell && !this.isGameStoped()) {
-      this.clickedCell.clicked();
-      this.checkStatus();
+    get(x,y) {
+        if (this.xIsValide(x) && this.yIsValide(y)) {
+            return this.cells[x + y*this.width];
+        } else {
+            return undefined;
+        }
     }
-  }
 
-  checkStatus() {
-    if (this.isLost()) {
-      this.gameIsOver = true;
-      this.text='oh no :( you died x_x';
-    } else if (this.isWon()) {
-      this.gameIsWon = true;
-      this.text="Good job ! You got'em all :D";
+    xIsValide(x) {
+        return x>=0 && x<this.width;
     }
-  }
 
-  isLost() {
-    var isLost = false;
+    yIsValide(y) {
+        return y>=0 && y<this.height;
+    }
 
-    return isLost;
-  }
+    getClickedCell() {
+        this.clickedCell = this.getCurrentCell();
+        return this.clickedCell;
+    }
 
-  isWon() {
-    var isWon = false;
+    getCurrentCell() {
+        // Centrage du board
+        const boardWidth = game.settings.boardSize * game.settings.cellSize;
+        const diff = cnv.width - boardWidth;
+        const d = diff / 2;
 
-    return isWon;
-  }
+        const x = Math.floor((mouseX - d) / game.settings.cellSize);
+        const y = Math.floor((mouseY - d) / game.settings.cellSize);
+        return  this.get(x, y);
+    }
 
-  isGameStoped() {
-    return this.gameIsWon || this.gameIsOver;
-  }
+    handleClick() {
+        console.log(mouseX, mouseY);
+        this.getClickedCell();
+        if(this.clickedCell && !this.isGameStoped()) {
+            this.clickedCell.clicked();
+            this.checkStatus();
+        }
+    }
+
+    checkStatus() {
+        if (this.isLost()) {
+            this.gameIsOver = true;
+            this.text='oh no :( you died x_x';
+        } else if (this.isWon()) {
+            this.gameIsWon = true;
+            this.text="Good job ! You got'em all :D";
+        }
+    }
+
+    isLost() {
+        const isLost = false;
+        return isLost;
+    }
+
+    isWon() {
+        const isWon = false;
+        return isWon;
+    }
+
+    isGameStoped() {
+        return this.gameIsWon || this.gameIsOver;
+    }
 
 }
