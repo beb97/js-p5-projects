@@ -7,26 +7,18 @@ class Cell {
 
     draw() {
         this.drawBackGround();
-        this.drawBoarder();
-        this.drawPiece();
-    }
-
-    drawBoarder() {
-        const borderColorNormal = 100; // Gris fonce
-        const borderColorHover = 800; // Gris fonce
-        const borderColor = (this === game.board.getCurrentCell()) ? borderColorHover : borderColorNormal;
-        stroke(borderColor); // Bordure
     }
 
     drawBackGround() {
         const corner = this.getTopLeftCorner();
-        const borderSize = 1;
-        stroke('black');
-        rect(corner.x, corner.y, game.settings.cellSize-borderSize, game.settings.cellSize-borderSize);
+        fill('white');
+        const borderColor = (this === game.board.getCurrentCell()) ? 'blue' : 'black';
+        stroke(borderColor);
+        rect(corner.x, corner.y, game.settings.cellSize, game.settings.cellSize);
     }
 
     drawPiece() {
-        if (  this.piece != null ) {
+        if (  this.hasPiece() ) {
             this.piece.draw(this.getCenter());
         }
     }
@@ -45,7 +37,7 @@ class Cell {
     }
 
     react(ray) {
-        if(this.piece !== null) {
+        if(this.hasPiece()) {
             return this.piece.react(ray);
         } else {
             return ray;
@@ -61,11 +53,34 @@ class Cell {
     }
 
     leftClicked() {
-        null;
+        let current = game.board.clickedCell;
+        let movingPiece = game.board.movingPiece;
+
+        // La case cliquée contient une piéce
+        if (current.hasPiece()) {
+            // Et aucune piece n'est en mouvement
+            if (movingPiece === null) {
+                // On met en mouvement la piece de la case cliquée
+                game.board.movingPiece = current.piece;
+            }
+            // la piéce de la case cliquée est aussi la pièce en mouvement.
+            else if(current.piece === movingPiece) {
+                // On annule le mouvement
+                game.board.movingPiece = null;
+            }
+        }
+        // La case cliquée ne contient pas de piece ET une piece et en mouvement
+        else if ( movingPiece !== null) {
+            // On pose la piece en mouvement sur la case cliquée.
+            movingPiece.move(current);
+        }
     }
 
     rightClicked() {
-        null;
+        if(this.hasPiece()) {
+            this.piece.orientation.rotateClock();
+            preventDefault();
+        }
     }
 
     x() {
@@ -78,6 +93,10 @@ class Cell {
 
     getCoord() {
         return createVector(this.x(), this.y());
+    }
+
+    hasPiece() {
+        return this.piece !== null;
     }
 
 }

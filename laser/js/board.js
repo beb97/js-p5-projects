@@ -3,11 +3,13 @@ class Board {
     constructor(size) {
         this.width = size;
         this.height = size;
+        this.movingPiece = null;
         this.clickedCell = undefined;
         this.gameIsOver = false;
         this.gameIsWon = false;
         this.text = '';
         this.cells = new Array(this.width * this.height).fill().map( (item, index) => new Cell(index) );
+        this.players = [new Player("1"), new Player("2", "red")];
         this.layout = new Layout(this).classic().import();
         this.rayPather = new RayPather();
     }
@@ -18,6 +20,10 @@ class Board {
 
         for( let [index, cell] of this.cells.entries() ){
             cell.draw(index);
+        }
+
+        for( let cell of this.cells ){
+            cell.drawPiece();
         }
 
         this.rayPather.draw();
@@ -47,7 +53,6 @@ class Board {
     }
 
     getCurrentCell() {
-        // Centrage du board
         const boardWidth = game.settings.boardSize * game.settings.cellSize;
         const diff = cnv.width - boardWidth;
         const d = diff / 2;

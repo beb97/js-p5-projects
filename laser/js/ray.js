@@ -1,6 +1,6 @@
 class Ray {
 
-    constructor(cell, from = new Orientation(undefined), to = new Orientation()) {
+    constructor(cell, from = new Orientation(null), to = new Orientation()) {
         this.cell = cell;
         this.from = from;
         this.to = to;
@@ -22,18 +22,17 @@ class Ray {
             center.y + size/2 * this.to.y());
     }
 
-  // getNextCell() {
-  //   var nextCell = undefined;
-  //   if(this.cell.piece = undefined) {
-  //
-  //   }
-  //   var orientation = this.cell.piece.orientation;
-  //   nextCell = game.board.get(
-  //     this.cell.x() + orientation.x(),
-  //     this.cell.y() + orientation.y());
-  //
-  //   return nextCell;
-  // }
+    block() {
+        this.to = new Orientation(null);
+    }
+
+    isBlocked() {
+        return this.to.value === null;
+    }
+
+    isOnPiece() {
+        return (this.cell.piece !== null);
+    }
 
     copy() {
         return new Ray(this.cell, this.from.copy(), this.to.copy());

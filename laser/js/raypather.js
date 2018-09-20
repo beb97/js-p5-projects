@@ -6,7 +6,7 @@ class RayPather {
 
     draw() {
         this.rayPaths = this.generateAllRayPaths(this.getLasers());
-        for( let [index, rayPath] of this.rayPaths.entries() ){
+        for( let rayPath of this.rayPaths ){
             rayPath.draw();
         }
     }
@@ -14,7 +14,7 @@ class RayPather {
     getLasers() {
         let lasers = [];
         const cells = game.board.cells;
-        for( let [index, cell] of cells.entries() ){
+        for( let cell of cells ){
             if(cell.piece && cell.piece instanceof Laser) {
                 lasers.push(cell);
             }
@@ -24,7 +24,7 @@ class RayPather {
 
     generateAllRayPaths(lasers) {
         let rayPaths = [];
-        for( let [index, laser] of lasers.entries() ){
+        for( let laser of lasers ){
             rayPaths.push(this.generateRayPath(laser));
         }
         return rayPaths;
@@ -36,7 +36,7 @@ class RayPather {
         rayPath.addRay(laser.piece.generateRay());
 
         let nextRay = this.getNextRay(rayPath);
-        while ( nextRay !== undefined) {
+        while ( nextRay !== undefined && !nextRay.isBlocked()) {
             rayPath.addRay(nextRay);
             nextRay = this.getNextRay(rayPath);
         }
@@ -57,7 +57,6 @@ class RayPather {
             nextRay.to = currentRay.to.copy();
             nextCell.react(nextRay);
         }
-
         return nextRay;
     }
 
@@ -76,7 +75,7 @@ class RayPath {
     }
 
     draw() {
-        for( let [index, ray] of this.rayPath.entries() ){
+        for( let ray of this.rayPath ){
             ray.draw();
         }
     }

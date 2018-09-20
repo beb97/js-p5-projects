@@ -1,25 +1,31 @@
 class Layout {
     constructor(board) {
         this.board = board;
-        this.map = [];
+        this.players = board.players;
     }
 
     import() {
-        for (let currentPiece of this.map) {
-            currentPiece.cell.piece = currentPiece;
+        for (let player of this.players) {
+            for (let currentPiece of player.pieces) {
+                currentPiece.cell.piece = currentPiece;
+            }
         }
         return this;
     }
 
     classic() {
-        const cells = this.board.cells;
         this.reset();
-        this.map.push(new Laser(cells[0]));
-        this.map.push(new Miroir(cells[4]));
-        this.map.push(new Miroir(cells[6]));
-        this.map.push(new Miroir(cells[20]));
-        this.map.push(new Miroir(cells[24]));
-        this.map.push(new Laser(cells[46], new Orientation(-90) ));
+        const cells = this.board.cells;
+        let player = this.players[0];
+        player.addPiece(new Laser(cells[0]));
+        player.addPiece(new Mirror(cells[4], new Orientation(180) ));
+        player.addPiece(new DoubleMirror(cells[6]));
+        player.addPiece(new Mirror(cells[20]));
+        player.addPiece(new Mirror(cells[24]));
+        player.addPiece(new DoubleMirror(cells[62]));
+        player = this.players[1];
+        player.addPiece(new Laser(cells[46], new Orientation(-90) ));
+        player.addPiece(new DoubleMirror(cells[66]));
         return this;
     }
 
