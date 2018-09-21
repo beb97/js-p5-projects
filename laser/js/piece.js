@@ -52,6 +52,16 @@ class Piece {
     isMoving() {
         return this === game.board.movingPiece;
     }
+
+    setDrawAttributes() {
+        const center = this.getPieceCenter();
+        const borderColor = (this.cell === game.board.getCurrentCell() ) ? 'blue' : 'black';
+        translate(center.x, center.y);
+        strokeWeight(3);
+        stroke(borderColor);
+        fill(this.cell.piece.player.color);
+        rotate(this.orientation.value);
+    }
 }
 
 class Laser extends Piece {
@@ -62,16 +72,11 @@ class Laser extends Piece {
 
 
     draw() {
-        let center = this.getPieceCenter();
         let size = game.settings.cellSize;
 
-
         push();
-        translate(center.x, center.y);
-        strokeWeight(3);
-        fill(this.cell.piece.player.color);
-        ellipse(0,0, size/1.5);
-        rotate(this.orientation.value);
+        this.setDrawAttributes();
+        ellipse(0,0, size);
         line(0, 0, (size/3), 0);
         pop();
     }
@@ -89,31 +94,93 @@ class Mirror extends Piece {
     }
 
     react(ray) {
+        switch (this.touchedFrom(ray)) {
+        case 0:
+            ray.to.rotateClock();
+            break;
+        case 90:
+            ray.to.rotateAntiClock();
+            break;
+        default:
+            this.die();
+        }
+    }
+
+    draw() {
+        let size = game.settings.cellSize;
+        let length = size / 2;
+        push();
+        this.setDrawAttributes();
+        triangle( - length, - length, -length, length, length, length);
+        pop();
+
+    }
+}
+
+class King extends Piece {
+
+    constructor(cell, orientation = new Orientation()) {
+        super(cell, orientation);
+    }
+
+    react(ray) {
+        switch (this.touchedFrom(ray)) {
+            default:
+                this.die();
+        }
+    }
+
+    draw() {
+        let size = game.settings.cellSize;
+        push();
+        this.setDrawAttributes();
+        this.star(0,0, size/3, size/2, 6);
+
+        pop();
+    }
+
+    star(x, y, radius1, radius2, npoints) {
+        angleMode(RADIANS);
+        let angle = TWO_PI / npoints;
+        let halfAngle = angle / 2.0;
+        beginShape();
+        for (let a = 0; a < TWO_PI; a += angle) {
+            let sx = x + cos(a) * radius2;
+            let sy = y + sin(a) * radius2;
+            vertex(sx, sy);
+            sx = x + cos(a + halfAngle) * radius1;
+            sy = y + sin(a + halfAngle) * radius1;
+            vertex(sx, sy);
+        }
+        endShape(CLOSE);
+        angleMode(DEGREES);
+    }
+}
+
+class Guard extends Piece {
+
+    constructor(cell, orientation = new Orientation()) {
+        super(cell, orientation);
+    }
+
+    react(ray) {
 
         switch (this.touchedFrom(ray)) {
             case 0:
-                ray.to.rotateClock();
-                break;
-            case 90:
-                ray.to.rotateAntiClock();
+                ray.block();
                 break;
             default:
-                ray.block();
-
+                this.die();
         }
         return ray;
     }
 
     draw() {
-        let center = this.getPieceCenter();
         let size = game.settings.cellSize;
-        let length = size / 2;
         push();
-        strokeWeight(3);
-        fill(this.cell.piece.player.color);
-        translate(center.x, center.y);
-        rotate(this.orientation.value);
-        triangle( - length, - length, -length, length, length, length);
+        this.setDrawAttributes();
+        rectMode(CENTER);
+        rect( 0, 0, size, size, size/2, 0, 0, size/2);
 
         pop();
     }
@@ -145,17 +212,12 @@ class DoubleMirror extends Piece {
     }
 
     draw() {
-        let center = this.getPieceCenter();
         let size = game.settings.cellSize;
-        let length = size;
         push();
-        strokeWeight(3);
-        fill(this.cell.piece.player.color);
-        translate(center.x, center.y);
-        rotate(this.orientation.value + 45);
+        this.setDrawAttributes();
         rectMode(CENTER);
-        rect( 0,0, length, length/4);
-
+        rotate(45);
+        rect( 0,0, size, size/4);
         pop();
     }
 }

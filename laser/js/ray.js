@@ -9,7 +9,9 @@ class Ray {
     draw() {
         const size = game.settings.cellSize;
         const center = this.cell.getCenter();
+        push();
         stroke('red');
+        strokeWeight(2);
         // ellipse(center.x, center.y, size/2);
         if( this.from.value != null) {
             line(center.x + (size/2) * this.from.x(),
@@ -20,6 +22,7 @@ class Ray {
         line(center.x, center.y,
             center.x + size/2 * this.to.x(),
             center.y + size/2 * this.to.y());
+        pop();
     }
 
     block() {

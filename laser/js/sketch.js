@@ -53,8 +53,8 @@ class Game {
     }
 
     draw() {
-        var cWidth = game.settings.cellSize * game.settings.boardSize;
-        var cHeight = game.settings.cellSize * game.settings.boardSize;
+        const cWidth = game.settings.cellSize * game.settings.boardSize +1;
+        const cHeight = game.settings.cellSize * game.settings.boardSize +1;
 
         // CANEVAS
         cnv = createCanvas(cWidth,cHeight);

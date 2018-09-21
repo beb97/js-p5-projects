@@ -3,6 +3,7 @@ class Cell {
     constructor(index) {
         this.index = index;
         this.piece = null;
+        this.player = null;
     }
 
     draw() {
@@ -11,9 +12,12 @@ class Cell {
 
     drawBackGround() {
         const corner = this.getTopLeftCorner();
-        fill('white');
+        const backGroundColor = (this.player !== null) ? this.player.getColor(100) : 'white';
+        fill(backGroundColor);
         const borderColor = (this === game.board.getCurrentCell()) ? 'blue' : 'black';
+        const borderWeight = (this === game.board.getCurrentCell()) ? 2 : 1;
         stroke(borderColor);
+        strokeWeight(borderWeight);
         rect(corner.x, corner.y, game.settings.cellSize, game.settings.cellSize);
     }
 
@@ -25,7 +29,7 @@ class Cell {
 
     getTopLeftCorner() {
         // Centrage du board
-        const boardWidth = game.settings.boardSize * game.settings.cellSize;
+        const boardWidth = game.settings.boardSize * game.settings.cellSize + 1;
         const diff = cnv.width - boardWidth;
         const d = diff / 2;
         return createVector(this.x() * game.settings.cellSize + d, this.y() * game.settings.cellSize + d);
@@ -79,7 +83,6 @@ class Cell {
     rightClicked() {
         if(this.hasPiece()) {
             this.piece.orientation.rotateClock();
-            preventDefault();
         }
     }
 
@@ -97,6 +100,15 @@ class Cell {
 
     hasPiece() {
         return this.piece !== null;
+    }
+
+    isNeighboor(cell) {
+        if (cell === this) return false;
+
+    }
+
+    isValidTarget(piece) {
+
     }
 
 }

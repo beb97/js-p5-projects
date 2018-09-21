@@ -9,7 +9,7 @@ class Board {
         this.gameIsWon = false;
         this.text = '';
         this.cells = new Array(this.width * this.height).fill().map( (item, index) => new Cell(index) );
-        this.players = [new Player("1"), new Player("2", "red")];
+        this.players = [new Player("1", color(0,180,0,255)), new Player("2", color(180,0,0,255))];
         this.layout = new Layout(this).classic().import();
         this.rayPather = new RayPather();
     }
@@ -63,8 +63,8 @@ class Board {
     }
 
     handleClick() {
-        console.log(mouseX, mouseY);
         this.getClickedCell();
+        console.log(mouseX, mouseY, this.clickedCell);
         if(this.clickedCell && !this.isGameStoped()) {
             this.clickedCell.clicked();
             this.checkStatus();
