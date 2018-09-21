@@ -1,7 +1,7 @@
 class Player {
 
     constructor(name, pColor = 'green') {
-        this.name = name;
+        this.id = name;
         this.color = pColor;
         this.pieces = [];
         this.cells = [];

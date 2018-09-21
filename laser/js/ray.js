@@ -12,7 +12,6 @@ class Ray {
         push();
         stroke('red');
         strokeWeight(2);
-        // ellipse(center.x, center.y, size/2);
         if( this.from.value != null) {
             line(center.x + (size/2) * this.from.x(),
                 center.y + (size/2) * this.from.y(),

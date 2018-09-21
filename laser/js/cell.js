@@ -12,13 +12,22 @@ class Cell {
 
     drawBackGround() {
         const corner = this.getTopLeftCorner();
-        const backGroundColor = (this.player !== null) ? this.player.getColor(100) : 'white';
+        const backGroundColor = this.getBackgroundColor();
         fill(backGroundColor);
         const borderColor = (this === game.board.getCurrentCell()) ? 'blue' : 'black';
         const borderWeight = (this === game.board.getCurrentCell()) ? 2 : 1;
         stroke(borderColor);
         strokeWeight(borderWeight);
         rect(corner.x, corner.y, game.settings.cellSize, game.settings.cellSize);
+    }
+
+    getBackgroundColor() {
+        let backgroundColor = (this.player !== null) ? this.player.getColor(100) : 'white';
+        let movingPiece = game.board.movingPiece;
+        if(movingPiece && this.isValidTarget(movingPiece)) {
+            backgroundColor = color(250,250,0,200);
+        }
+        return backgroundColor;
     }
 
     drawPiece() {
@@ -28,11 +37,7 @@ class Cell {
     }
 
     getTopLeftCorner() {
-        // Centrage du board
-        const boardWidth = game.settings.boardSize * game.settings.cellSize + 1;
-        const diff = cnv.width - boardWidth;
-        const d = diff / 2;
-        return createVector(this.x() * game.settings.cellSize + d, this.y() * game.settings.cellSize + d);
+        return createVector(this.x() * game.settings.cellSize, this.y() * game.settings.cellSize);
     }
 
     getCenter() {
@@ -48,50 +53,12 @@ class Cell {
         }
     }
 
-    clicked() {
-        if(mouseButton === CENTER) {
-            this.rightClicked();
-        } else if (mouseButton === LEFT) {
-            this.leftClicked();
-        }
-    }
-
-    leftClicked() {
-        let current = game.board.clickedCell;
-        let movingPiece = game.board.movingPiece;
-
-        // La case cliquée contient une piéce
-        if (current.hasPiece()) {
-            // Et aucune piece n'est en mouvement
-            if (movingPiece === null) {
-                // On met en mouvement la piece de la case cliquée
-                game.board.movingPiece = current.piece;
-            }
-            // la piéce de la case cliquée est aussi la pièce en mouvement.
-            else if(current.piece === movingPiece) {
-                // On annule le mouvement
-                game.board.movingPiece = null;
-            }
-        }
-        // La case cliquée ne contient pas de piece ET une piece et en mouvement
-        else if ( movingPiece !== null) {
-            // On pose la piece en mouvement sur la case cliquée.
-            movingPiece.move(current);
-        }
-    }
-
-    rightClicked() {
-        if(this.hasPiece()) {
-            this.piece.orientation.rotateClock();
-        }
-    }
-
     x() {
-        return this.index % game.settings.boardSize;
+        return this.index % game.settings.boardwidth;
     }
 
     y() {
-        return Math.trunc( this.index / game.settings.boardSize );
+        return Math.trunc( this.index / game.settings.boardwidth);
     }
 
     getCoord() {
@@ -102,13 +69,20 @@ class Cell {
         return this.piece !== null;
     }
 
-    isNeighboor(cell) {
-        if (cell === this) return false;
-
+    isNeighboor(cell, distance = 1) {
+        if (cell === this) {return false}
+        return ( distance >= this.getCoord().dist( cell.getCoord())  );
     }
 
     isValidTarget(piece) {
+        if(!piece.isMovable()) {return false;}
+        if(!piece.cell.isNeighboor(this, 1.5)) {return false;}
+        if(!piece.canSwap() && this.hasPiece()) {return false;}
+        if(piece.canSwap() && this.hasPiece() && !this.piece.isSwapable()) {return false;}
+        if(this.player !== null && this.player !== piece.player) {return false;}
+        if(piece.player != game.board.player) {return false;}
 
+        return true;
     }
 
 }

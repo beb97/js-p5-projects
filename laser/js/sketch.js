@@ -20,14 +20,17 @@ function draw() {
 }
 
 function mousePressed() {
-    if ( game.withinCanevas(mouseX, mouseY) ) {
-        game.board.handleClick();
-    }
+        game.board.commandManager.handleClick();
+}
+
+function keyPressed() {
+        game.board.commandManager.handleKey();
 }
 
 class Settings {
-    constructor(boardSize = 10) {
-        this.boardSize = boardSize;
+    constructor(boardwidth = 10, boardHeight = 8) {
+        this.boardwidth = boardwidth;
+        this.boardHeight = boardHeight;
         this.cellSize = 50;
     }
 }
@@ -35,14 +38,14 @@ class Settings {
 class Game {
     constructor() {
         this.settings = new Settings();
-        this.board = new Board(this.settings.boardSize);
+        this.board = new Board(this.settings.boardwidth, this.settings.boardHeight);
     }
 
     reset() {
         delete game.settings;
         delete game.board;
         game.settings = new Settings();
-        game.board = new Board(game.settings.boardSize);
+        game.board = new Board(this.settings.boardwidth, this.settings.boardHeight);
     }
 
     update() {
@@ -53,8 +56,8 @@ class Game {
     }
 
     draw() {
-        const cWidth = game.settings.cellSize * game.settings.boardSize +1;
-        const cHeight = game.settings.cellSize * game.settings.boardSize +1;
+        const cWidth = game.settings.cellSize * game.settings.boardwidth +1;
+        const cHeight = game.settings.cellSize * game.settings.boardHeight +1;
 
         // CANEVAS
         cnv = createCanvas(cWidth,cHeight);

@@ -20,10 +20,14 @@ class Piece {
     }
 
     move(newCell) {
-        this.cell.piece = null;
+        if(newCell.hasPiece()) {
+            newCell.piece.cell = this.cell;
+            this.cell.piece = newCell.piece;
+        } else {
+            this.cell.piece = null;
+        }
         this.cell = newCell;
         this.cell.piece = this;
-        game.board.movingPiece = null;
     }
 
     getPieceCenter() {
@@ -62,6 +66,18 @@ class Piece {
         fill(this.cell.piece.player.color);
         rotate(this.orientation.value);
     }
+
+    isMovable() {
+        return true;
+    }
+
+    isSwapable() {
+        return true;
+    }
+
+    canSwap() {
+        return false;
+    }
 }
 
 class Laser extends Piece {
@@ -70,6 +86,9 @@ class Laser extends Piece {
         super(cell, orientation);
     }
 
+    react() {
+        this.die();
+    }
 
     draw() {
         let size = game.settings.cellSize;
@@ -83,6 +102,14 @@ class Laser extends Piece {
 
     generateRay() {
         return new Ray(this.cell, new Orientation(null), this.orientation.copy());
+    }
+
+    isMovable() {
+        return false;
+    }
+
+    isSwapable() {
+        return false;
     }
 
 }
@@ -220,6 +247,18 @@ class DoubleMirror extends Piece {
         rect( 0,0, size, size/4);
         pop();
     }
+
+    canSwap() {
+        return true;
+    }
+
+    // move(newCell) {
+    //     if(newCell.hasPiece()) {
+    //         this.swap(newCell.piece);
+    //     } else {
+    //         super.move(newCell);
+    //     }
+    // }
 }
 
 class Orientation {

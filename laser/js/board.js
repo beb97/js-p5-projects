@@ -1,22 +1,25 @@
 class Board {
 
-    constructor(size) {
-        this.width = size;
-        this.height = size;
+    constructor(widht, height) {
+        this.width = widht;
+        this.height = height;
         this.movingPiece = null;
         this.clickedCell = undefined;
         this.gameIsOver = false;
         this.gameIsWon = false;
         this.text = '';
         this.cells = new Array(this.width * this.height).fill().map( (item, index) => new Cell(index) );
-        this.players = [new Player("1", color(0,180,0,255)), new Player("2", color(180,0,0,255))];
+        this.players = [new Player(0, color(0,180,0,255)), new Player(1, color(180,0,0,255))];
         this.layout = new Layout(this).classic().import();
         this.rayPather = new RayPather();
+        this.player = this.players[0];
+        this.commandManager = new CommandManager();
     }
 
     draw() {
         const backgroundColor = '#888888';
         background(backgroundColor);
+        home.style('color:'+this.player.color.toString());
 
         for( let [index, cell] of this.cells.entries() ){
             cell.draw(index);
@@ -53,22 +56,9 @@ class Board {
     }
 
     getCurrentCell() {
-        const boardWidth = game.settings.boardSize * game.settings.cellSize;
-        const diff = cnv.width - boardWidth;
-        const d = diff / 2;
-
-        const x = Math.floor((mouseX - d) / game.settings.cellSize);
-        const y = Math.floor((mouseY - d) / game.settings.cellSize);
+        const x = Math.floor((mouseX) / game.settings.cellSize);
+        const y = Math.floor((mouseY) / game.settings.cellSize);
         return  this.get(x, y);
-    }
-
-    handleClick() {
-        this.getClickedCell();
-        console.log(mouseX, mouseY, this.clickedCell);
-        if(this.clickedCell && !this.isGameStoped()) {
-            this.clickedCell.clicked();
-            this.checkStatus();
-        }
     }
 
     checkStatus() {
@@ -94,5 +84,15 @@ class Board {
     isGameStoped() {
         return this.gameIsWon || this.gameIsOver;
     }
+
+    getNextPlayer() {
+        const index = (this.player.id + 1 == this.players.length) ? 0 : this.player.id + 1;
+        return this.players[index];
+    }
+
+    setNextPlayer() {
+        this.player = this.getNextPlayer();
+    }
+
 
 }
